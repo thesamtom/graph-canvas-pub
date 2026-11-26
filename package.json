@@ -1,0 +1,30 @@
+{
+  "name": "graph-canvas",
+  "version": "2.0.0",
+  "description": "Preview and generate synthetic Git contribution calendars in a dedicated private repository.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  },
+  "bin": {
+    "graph-canvas": "index.js"
+  },
+  "files": [
+    "index.js",
+    "plan.js",
+    "commits.js",
+    "src/"
+  ],
+  "type": "module",
+  "dependencies": {
+    "moment": "^2.31.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesamtom/graph-canvas-pub.git"
+  }
+}
