@@ -4,13 +4,91 @@ Graph Canvas 2.0 is a terminal simulator for synthetic Git contribution calendar
 
 Each commit carries the subject `chore: generate synthetic calendar entry`, a run identifier and an entry number. The commits record simulated activity. Describe them as synthetic when sharing a calendar or discussing your development history.
 
-## Prerequisites
+## First-time installation
 
-Use a terminal on Windows, macOS or Linux. Install Node.js 22 or newer with npm and Git. For a repository-backed preview, generation or push, also install GitHub CLI (`gh`). An offline preview only needs Node, npm and Git.
+You will use two repositories. A *repository* is a project folder with a history of its changes.
 
-Repository-backed runs also require a GitHub account, Git authentication, and a dedicated private repository you can write to.
+| Repository | What you do with it |
+| --- | --- |
+| `thesamtom/graph-canvas-pub` (public) | Download the Graph Canvas program from here and run it on your computer. |
+| `YOUR-USERNAME/calendar-sandbox` (private) | Create this on your GitHub account. Paste **this repository's URL** when the wizard asks where to put synthetic commits. |
 
-## Quick start
+Follow the steps in order on your first run. If you already downloaded Graph Canvas, keep your existing folder and skip the `git clone` step.
+
+### 1. Install the three tools
+
+Open **PowerShell** from the Start menu on Windows, or **Terminal** on macOS or Linux. Enter commands one line at a time and press **Enter** after each line.
+
+| Tool | Why Graph Canvas uses it | Installation |
+| --- | --- | --- |
+| Node.js and npm | Node runs the program. npm installs its dependencies. | Choose an LTS release **22 or newer** from the [Node.js downloads page](https://nodejs.org/en/download). |
+| Git (`git`) | Downloads repositories and creates local commits. | Select your operating system on the [Git installation page](https://git-scm.com/downloads). |
+| GitHub CLI (`gh`) | Signs your terminal into GitHub so Graph Canvas can check a private repository. | Windows users can run `winget install --id GitHub.cli --exact`. On macOS with Homebrew, run `brew install gh`. For other installers and Linux instructions, use the [GitHub CLI installation page](https://cli.github.com/). |
+
+Close and reopen your terminal after installing. Run these checks. Each command should print a version, and the first should start with `v22` or higher.
+
+```sh
+node --version
+npm --version
+git --version
+gh --version
+```
+
+If a command says "not recognized" or "command not found," install the matching tool from the table and open a new terminal. If PowerShell blocks `npm.ps1`, use `npm.cmd` in place of `npm` throughout this guide.
+
+### 2. Create your private repository in the browser
+
+1. Sign in to GitHub. If you are new, [create an account](https://github.com/signup) and complete GitHub's email verification.
+2. Open the [new repository form](https://github.com/new). Choose your own username under **Owner** and enter **calendar-sandbox** as the repository name.
+3. Choose **Private**, turn on **Add a README file** so you have a starting branch, and click **Create repository**.
+4. On your new repository's page, click **Code**, choose **HTTPS**, and copy the URL. It will look like `https://github.com/YOUR-USERNAME/calendar-sandbox.git`. Keep it handy for the wizard.
+
+Already have a dedicated private repository? Copy its HTTPS URL and use its actual owner and name in the remaining steps. [GitHub's repository creation guide](https://docs.github.com/en/repositories/creating-and-managing-repositories/quickstart-for-repositories)
+
+### 3. Sign your terminal into GitHub
+
+Signing in on the GitHub website gives your **browser** access. This next step gives the **terminal** access. You can run it from any folder.
+
+```sh
+gh auth login --hostname github.com --web
+```
+
+1. If asked for a Git protocol, choose **HTTPS**.
+2. If asked **Authenticate Git with your GitHub credentials?**, choose **Yes**. This lets Git use your sign-in when the wizard clones or pushes.
+3. When the terminal displays a one-time device code, press **Enter** to open GitHub in your browser. Enter the code from **your own terminal** on GitHub's device sign-in page and authorize GitHub CLI. Keep the code private.
+4. Return to the terminal. Wait for **Logged in as** and check that it shows the account that owns your private repository. [GitHub CLI sign-in reference](https://cli.github.com/manual/gh_auth_login)
+
+### 4. Verify access before starting the wizard
+
+Replace `YOUR-USERNAME` with the GitHub username shown in Step 3. If you chose a different repository name, replace `calendar-sandbox` too.
+
+```sh
+gh auth status --hostname github.com
+gh repo view YOUR-USERNAME/calendar-sandbox --json visibility,viewerPermission
+```
+
+For a private repository you own, the second command should return values like these (the field order can vary).
+
+```json
+{
+  "viewerPermission": "ADMIN",
+  "visibility": "PRIVATE"
+}
+```
+
+**PRIVATE** plus **ADMIN**, **MAINTAIN**, or **WRITE** means your signed-in account has the access the wizard needs. If this check fails, use the table below before retrying the wizard.
+
+| What you see | What to do |
+| --- | --- |
+| GitHub says you are not logged in | Complete Step 3, including browser authorization, then rerun both checks. |
+| The active account is different | Run `gh auth switch --hostname github.com` if the correct account is already saved, or use Step 3 to sign it in. |
+| Repository not found, or GitHub cannot verify access | Open the private repository in your browser. Compare its owner and name with the command, verify the terminal account, and check your connection. |
+| `PUBLIC`, `READ`, or `TRIAGE` | Choose a dedicated private repository you own or have permission to write to. |
+| The wizard keeps asking for the URL | Press **Enter** at **Return to repository setup? (y/N)** to exit. Run the two commands above in that same terminal. Retrying different URL formats repeats the same GitHub account check. |
+
+### 5. Download and launch Graph Canvas
+
+From a folder where you keep projects, run:
 
 ```sh
 git clone https://github.com/thesamtom/graph-canvas-pub.git
@@ -19,16 +97,15 @@ npm ci
 npm start
 ```
 
-The source checkout needs a writable directory for its local workspace. On Windows, `npm.cmd` works in PowerShell environments that restrict npm’s script shim.
+If you already downloaded the program, open a terminal **inside the folder containing `package.json`** and run the last two commands. `npm ci` installs the versioned dependencies. On later visits, open the same folder and run `npm start`.
 
-## Prepare your private repository
+When you see **Private GitHub repository URL**, paste the HTTPS URL you copied in Step 2. If the wizard has no Git identity to suggest, enter your name and an email associated with your GitHub account. You can find your GitHub-provided noreply address in [GitHub email settings](https://github.com/settings/emails).
 
-1. Sign in to GitHub.com. Choose **New repository**, enter a name, and create a **private** repository solely for simulated activity. An empty repository works. You can also initialize it with a README. Keep Graph Canvas installed in its own source checkout.
-2. Run `gh auth login --hostname github.com` and use the GitHub CLI sign-in flow. Use `gh auth status --hostname github.com` to check which account is active. The account needs write access to the target.
-3. For HTTPS, use an existing Git credential manager or run `gh auth setup-git` yourself to use your GitHub CLI login for Git. For SSH, configure a key that GitHub recognizes. Authentication for Git and authentication for the GitHub API must both work.
-4. Copy the repository’s HTTPS or SSH clone URL. Graph Canvas accepts forms such as `https://github.com/OWNER/REPO.git`, `git@github.com:OWNER/REPO.git`, and `ssh://git@github.com/OWNER/REPO.git`. Supply a plain URL without a password or embedded token.
+**Want to see a calendar first?** After `npm ci`, run the following from the application folder. This offline preview needs only Node.js, npm and Git. It displays a schedule without connecting to GitHub or creating commits.
 
-Graph Canvas checks private visibility, repository identity and write permission using authenticated GitHub metadata. An unavailable check stops repository-backed generation. Git also checks transport access. The source repository and recognized source remotes are excluded. Generated commits go into a clone under the ignored `workspace/` directory. The completion summary prints its full path.
+```sh
+node index.js generate --dry-run --start 2024-02-28 --end 2024-03-01 --timezone UTC --total 4
+```
 
 ## Walk through a simulation
 
